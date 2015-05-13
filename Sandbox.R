@@ -23,8 +23,8 @@ g + geom_histogram(binwidth = 2500) +
   ggtitle("Histogram of Total Steps Per Day")
 
 # Use inline calculations when reporting these
-mean(total.steps$total.steps, na.rm = TRUE)
-median(total.steps$total.steps, na.rm = TRUE)
+mean <- floor(mean(total.steps$total.steps, na.rm = TRUE))
+median <- median(total.steps$total.steps, na.rm = TRUE)
 
 # Create a time series plot
 activity$interval.cat <- as.factor(activity$interval)
@@ -53,7 +53,7 @@ for (i in 1:nrow(activity.adj)){
   }
 }
 # Identical to original, but with NAs removed and date as both factor and POSIXct
-activity.adj <- activity.adj[, 1:4]
+activity.adj <- activity.adj[, 1:5]
 
 # Histogram of adjusted dataset
 total.steps <- tapply(activity.adj$steps, activity.adj$date, sum)
@@ -69,4 +69,29 @@ g + geom_histogram(binwidth = 2500) +
 mean(total.steps$total.steps, na.rm = TRUE)
 median(total.steps$total.steps, na.rm = TRUE)
 
+# Create new factor variable identifying day of the week, then weekday/weekend
+activity.adj$day.of.week <- weekdays(activity.adj$date.POS)
+activity.adj$weekday <- rep("Weekday", times = nrow(activity.adj))
+for (i in 1:nrow(activity.adj)){
+  if(activity.adj$day.of.week[i] == "Saturday" | activity.adj$day.of.week[i] == "Sunday"){
+    activity.adj$weekday[i] <- "Weekend"
+  }
+}
+activity.adj$weekday <- as.factor(activity.adj$weekday)
 
+# Split into 2 dataframes according to the weekday variable; calculate averages
+weekday <- activity.adj[activity.adj$weekday == "Weekday", ]
+weekend <- activity.adj[activity.adj$weekday == "Weekend", ]
+weekday.interval.avg <- tapply(weekday$steps, weekday$interval.cat, sum)/
+  length(unique(activity.adj$date))
+weekend.interval.avg <- tapply(weekend$steps, weekend$interval.cat, sum)/
+  length(unique(activity.adj$date))
+
+# Put into temporary data frame to make plot
+df <- data.frame(avg.steps = c(unname(weekday.interval.avg), unname(weekend.interval.avg)),
+                 interval = as.numeric(rep(names(weekday.interval.avg), times = 2)),
+                 weekday = factor(rep(c("Weekday", "Weekend"), each = length(weekday.interval.avg))))
+
+g <- ggplot(df, aes(interval, avg.steps))
+g + geom_line() + facet_grid(weekday ~ .) + xlab("Minutes") + ylab("Average Steps") +
+  ggtitle("Average Steps in Each Five-Minute Interval of a Day (Adjusted)")
