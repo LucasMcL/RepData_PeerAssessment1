@@ -84,8 +84,8 @@ g + geom_histogram(binwidth = 2500) +
 mean.steps <- mean(total.steps$total.steps, na.rm = TRUE)
 median.steps <- median(total.steps$total.steps, na.rm = TRUE)
 ```
-The mean number of steps per day, once adjusted for NAs is approximately `r round(mean.steps)`.  
-The median number of steps per day, once adjusted for NAs is `r median.steps`.
+The mean number of steps per day, once adjusted for NAs, is approximately `r round(mean.steps)`.  
+The median number of steps per day, once adjusted for NAs, is `r median.steps`.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 To compare weekday and weekend patterns, a factor variable "weekday" was created
@@ -118,4 +118,5 @@ g + geom_line() + facet_grid(weekday ~ .) + xlab("Minutes") + ylab("Average Step
   ggtitle("Average Steps in Each Five-Minute Interval of a Day (Adjusted)")
 ```
 
+There does seem to be a noticeable difference in the step patterns on weekdays and weekends.  Overall, more steps are taken during the week.
 
